@@ -1,20 +1,17 @@
 const express = require("express");
-const dotenv = require("dotenv");
-var cors = require("cors");
 const http = require("http");
-const socketIO = require("socket.io");
+const socketIo = require("socket.io");
+const apiRoutes = require("./routes/apiRoutes");
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
-const httpServer = http.createServer(app);
+// API 라우트에 io 전달
+app.use("/api", apiRoutes(io));
 
-const socketServer = socketIO(httpServer, {
-  cors: {
-    origin: "*",
-  },
+// 서버 포트 설정 및 시작
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ extended: false }));
-
-app.use("/api/users", userRoutes);
