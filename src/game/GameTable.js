@@ -1,7 +1,6 @@
-import tableManager from "./TableManager";
 const holdem = require("holdem");
 const Player = require("./Player");
-const CurrentGame = require("./CurrentGame");
+const Game = require("./Game");
 
 class GameTable {
   constructor(tableSocket, gameSocket, tableId) {
@@ -10,20 +9,28 @@ class GameTable {
     this.tableId = tableId;
 
     this.players = new Map();
-    this.currentGame = new CurrentGame(this.gameSocket);
+    this.currentGame = undefined;
+
+    this.tableSocket.on("connection", (socket) => {
+      socket.on("joinTable", { user });
+    });
   }
 
   addPlayer(user) {
-    const newPlayer = new Player(
-      tableManager.getTable(this.tableId),
-      this.currentGame,
-      user
-    );
-    this.players.set(user.email, newPlayer);
+    const newPlayer = new Player(this.tableSocket, this.gameSocket, user);
+    this.players.set(user.nickname, newPlayer);
+
+    setTimeout(() => {
+      this.tableSocket.emit("message", this.sendMessage(user.nickname, msg));
+    }, 500);
   }
 
   startGame() {
-    this.currentGame.joinPlayerToGame(this.players);
+    this.currentGame = new Game(this.gameSocket);
+  }
+
+  sendMessage(nickname, msg) {
+    return { nickname: nickname, msg: msg };
   }
 }
 

@@ -7,15 +7,8 @@ module.exports = function (io) {
     try {
       const { tableId } = req.params;
 
-      const tableSocket = io.of(`/table/${tableId}`).on("connection", () => {
-        console.log(`테이블 생성 완료 : ${tableId}`);
-      });
-
-      const gameSocket = io
-        .of(`/game/${tableId}`)
-        .on("connection", (socket) => {
-          console.log(`게임 생성 완료 : ${socket.id}`);
-        });
+      const tableSocket = io.of(`/table/${tableId}`);
+      const gameSocket = io.of(`/game/${tableId}`);
 
       tableManager.createTable(tableSocket, gameSocket, tableId);
 
