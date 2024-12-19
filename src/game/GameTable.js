@@ -1,36 +1,44 @@
-const holdem = require("holdem");
-const Player = require("./Player");
-const Game = require("./Game");
-
 class GameTable {
-  constructor(tableSocket, gameSocket, tableId) {
-    this.tableSocket = tableSocket;
-    this.gameSocket = gameSocket;
-    this.tableId = tableId;
-
-    this.players = new Map();
-    this.currentGame = undefined;
-
-    this.tableSocket.on("connection", (socket) => {
-      socket.on("joinTable", { user });
-    });
+  constructor(tableCode) {
+      this.tableCode = tableCode;
+      this.players = [];
+      this.gameStarted = false;
+      this.master = {
+        id: undefined,
+        nickname: undefined
+      };
   }
 
-  addPlayer(user) {
-    const newPlayer = new Player(this.tableSocket, this.gameSocket, user);
-    this.players.set(user.nickname, newPlayer);
+  addPlayer(player) {
+      if (this.players.length >= 8) {
+          throw new Error('방이 가득 찼습니다.');
+      }
 
-    setTimeout(() => {
-      this.tableSocket.emit("message", this.sendMessage(user.nickname, msg));
-    }, 500);
+      this.players.push(player);
+      if (!this.master) {
+          this.master.id = player.id;
+          this.master.nickname = player.nickname;
+      }
   }
 
-  startGame() {
-    this.currentGame = new Game(this.gameSocket);
+  removePlayer(playerId) {
+      this.players = this.players.filter(p => p.id !== playerId);
+
+      if (this.master === playerId && this.players.length > 0) {
+          this.master = this.players[0].id; // 방장이 나갔을 경우 첫 번째 유저를 방장으로 설정
+      }
   }
 
-  sendMessage(nickname, msg) {
-    return { nickname: nickname, msg: msg };
+  togglePlayerReady(playerId) {
+      const player = this.players.find(p => p.id === playerId);
+
+      if (player) {
+          player.toggleReady();
+      }
+  }
+
+  isAllPlayersReady() {
+      return this.players.length > 0 && this.players.every(p => p.ready);
   }
 }
 

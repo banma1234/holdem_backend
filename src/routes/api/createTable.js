@@ -1,16 +1,26 @@
-import tableManager from "../../game/TableManager";
+import Player from "../../model/Player";
 const express = require("express");
-const router = express.Router();
 
-module.exports = function (io) {
-  router.post("/tableId/:tableId", (req, res) => {
+module.exports = tableManager => {
+  const router = express.Router();
+
+  router.post("/createTable/:tableId", (req, res) => {
     try {
-      const { tableId } = req.params;
+      const tableId = req.params.tableId;
+      const { user } = req.body;
 
-      const tableSocket = io.of(`/table/${tableId}`);
-      const gameSocket = io.of(`/game/${tableId}`);
+      if (!tableId || !user.id || !user.nickname) {
+        return res.status(400).json({ success: false, message: 'Missing required fields.' });
+      }
 
-      tableManager.createTable(tableSocket, gameSocket, tableId);
+      if (tableManager.getTable(tableId)) {
+          return res.status(400).json({ success: false, message: "해당 방은 이미 존재합니다." });
+      }
+
+      const newTable = tableManager.createTable(tableId);
+      const player = new Player(user);
+
+      newTable.addPlayer(player);
 
       res.status(200).json({ success: true, message: "방이 생성되었습니다." });
     } catch (err) {

@@ -1,17 +1,25 @@
-const express = require("express");
-const http = require("http");
-const socketIo = require("socket.io");
-const apiRoutes = require("./routes/apiRoutes");
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const { apiRoutes } = require('./routes/api');
+const setupTableSocket = require('./websocket/tableSocket');
+const TableManager = require('./TableManager');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = new Server(server);
 
-// API 라우트에 io 전달
-app.use("/api", apiRoutes(io));
+const tableManager = new TableManager(); // TableManager 인스턴스 생성
 
-// 서버 포트 설정 및 시작
-const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Middleware
+app.use(express.json());
+
+// API Routes
+apiRoutes(app, tableManager, io);
+
+// Setup WebSocket
+setupTableSocket(io, tableManager);
+
+server.listen(8080, () => {
+    console.log('Server is running on http://localhost:8080');
 });

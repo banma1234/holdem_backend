@@ -1,33 +1,35 @@
-import GameTable from "./GameTable";
+const GameTable = require('./GameTable');
 
 class TableManager {
-  constructor() {
-    this.tables = new Map();
-  }
+    constructor() {
+        this.TABLE = new Map();
+    }
 
-  createTable(tableSocket, gameSocket, tableId) {
-    const table = new GameTable(tableSocket, gameSocket, tableId);
-    this.tables.set(tableId, table);
+    createTable(tableCode) {
+        if (this.TABLE.has(tableCode)) {
+            throw new Error('Table already exists.');
+        }
 
-    return table;
-  }
+        const table = new GameTable(tableCode);
+        this.TABLE.set(tableCode, table);
+        return table;
+    }
 
-  removeTable(tableId) {
-    this.tables.delete(tableId);
-  }
+    removeTable(tableCode) {
+        this.TABLE.delete(tableCode);
+    }
 
-  getTable(tableId) {
-    return this.tables.get(tableId);
-  }
+    getTable(tableCode) {
+        return this.TABLE.get(tableCode);
+    }
 
-  getTableSize() {
-    return this.tables.size();
-  }
+    getAllTables() {
+        return Array.from(this.TABLE.values());
+    }
 
-  getAllTables() {
-    return Array.from(this.tables.values());
-  }
+    getMasterInfo() {
+      return this.TABLE.get(tableCode).master;
+    }
 }
 
-const tableManager = new TableManager();
-export default tableManager;
+module.exports = TableManager;
