@@ -19,7 +19,7 @@ class GameTable {
     this.players.push(player);
   }
 
-  removePlayer(playerId) {
+  removePlayerById(playerId) {
     this.players = this.players.filter(p => p.id !== playerId);
 
     if (this.master === playerId && this.players.length > 0) {
@@ -46,6 +46,18 @@ class GameTable {
 
   isAllPlayersReady() {
     return this.players.length > 0 && this.players.every(p => p.ready);
+  }
+
+  isEmpty() {
+    return this.players.length === 0 ? true : false;
+  }
+
+  isPlayerExist(playerId) {
+    if (!this.getPlayerById(playerId)) {
+      return false;
+    }
+
+    return true;
   }
 }
 

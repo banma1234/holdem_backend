@@ -28,10 +28,6 @@ class TableManager {
   getAllTables() {
     return Array.from(this.TABLE.values());
   }
-
-  getMasterInfo() {
-    return this.TABLE.get(tableId).master;
-  }
 }
 
 module.exports = TableManager;
