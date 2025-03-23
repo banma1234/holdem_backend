@@ -16,9 +16,10 @@ module.exports = tableManager => {
 
       if (tableManager.getTable(tableId)) {
         return res
-          .status(400)
+          .status(409)
           .json({ success: false, message: "해당 방은 이미 존재합니다." });
       }
+
       tableManager.createTable(tableId, user);
 
       res.status(200).json({ success: true, message: "방이 생성되었습니다." });
