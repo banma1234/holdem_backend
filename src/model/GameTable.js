@@ -2,7 +2,7 @@ class GameTable {
   constructor(tableCode, master) {
     this.tableCode = tableCode;
     this.players = new Array(8);
-    this.gameStarted = false;
+    this.isGameStarted = false;
     this.master = {
       id: master.id,
       nickname: master.nickname,
